@@ -17,8 +17,38 @@ func NewArticlesController(db *gorm.DB) *ArticlesController {
 }
 
 func (controller ArticlesController) GetAll(c *gin.Context) {
+	user := c.MustGet("user").(models.User)
 	articles := []models.Article{}
-	controller.db.Find(&articles)
+	controller.db.Where(&models.Article{UserID: user.ID}).Find(&articles)
 
 	c.JSON(http.StatusOK, gin.H{"status": "ok", "articles": articles})
+}
+
+type CreateJSON struct {
+	Title string `json:"title" binding:"required"`
+	Body  string `json:"body" binding:"required"`
+}
+
+func (controller ArticlesController) Create(c *gin.Context) {
+	var json CreateJSON
+	if c.BindJSON(&json) != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "パラメータが無効です",
+		})
+		return
+	}
+
+	user := c.MustGet("user").(models.User)
+	article := models.Article{
+		UserID: user.ID,
+		Title:  json.Title,
+		Body:   json.Body,
+	}
+	controller.db.Create(&article)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "ok",
+		"article": article,
+	})
 }

@@ -1,12 +1,14 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/tsuyoshiwada/gin-sandbox/models"
 	"github.com/tsuyoshiwada/gin-sandbox/shared/jwtauth"
 )
 
@@ -21,6 +23,7 @@ func jwtAbort(c *gin.Context, msg string) {
 func JWTMiddleware(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
+		fmt.Println(authHeader)
 		if authHeader == "" {
 			jwtAbort(c, "Authorizationヘッダーが含まれていません")
 			return
@@ -34,7 +37,7 @@ func JWTMiddleware(db *gorm.DB) gin.HandlerFunc {
 
 		claims, err := jwtauth.ParseToken(parts[1])
 		if err != nil {
-			jwtAbort(c, "Tokenが無効です")
+			jwtAbort(c, "無効なTokenです")
 			return
 		}
 
@@ -43,6 +46,15 @@ func JWTMiddleware(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		user := models.User{}
+		db.First(&user, claims.UserID)
+
+		if user.ID != claims.UserID {
+			jwtAbort(c, "無効なTokenです")
+			return
+		}
+
+		c.Set("user", user)
 		c.Next()
 	}
 }

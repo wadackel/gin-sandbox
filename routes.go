@@ -17,20 +17,25 @@ func buildRoutes(db *gorm.DB) *gin.Engine {
 		auth.POST("/", authController.Auth)
 	}
 
-	// Users
-	userController := controllers.NewUsersController(db)
-	users := router.Group("/users")
+	// Authentication required
+	authorized := router.Group("/")
+	authorized.Use(middleware.JWTMiddleware(db))
 	{
-		users.Use(middleware.JWTMiddleware(db))
-		users.GET("/", userController.GetAll)
-		users.GET("/:id", userController.Get)
-	}
+		// Users
+		userController := controllers.NewUsersController(db)
+		users := authorized.Group("/users")
+		{
+			users.GET("/", userController.GetAll)
+			users.GET("/:id", userController.Get)
+		}
 
-	// Articles
-	articlesController := controllers.NewArticlesController(db)
-	articles := router.Group("/articles")
-	{
-		articles.GET("/", articlesController.GetAll)
+		// Articles
+		articlesController := controllers.NewArticlesController(db)
+		articles := authorized.Group("/articles")
+		{
+			articles.GET("/", articlesController.GetAll)
+			articles.POST("/", articlesController.Create)
+		}
 	}
 
 	return router
