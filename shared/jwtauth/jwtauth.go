@@ -17,7 +17,7 @@ type Claims struct {
 
 func GenerateToken(id uint, email string) (string, error) {
 	now := time.Now()
-	exp := now.Add(6 * time.Minute)
+	exp := now.Add(6 * time.Hour)
 
 	claims := Claims{
 		id,

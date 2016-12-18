@@ -25,9 +25,9 @@ func main() {
 	}
 	defer db.Close()
 
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{}, &models.Article{})
 
 	// Init router
-	router := buildRoutes(db)
+	router := buildRoutes(db.Debug())
 	router.Run(":8080")
 }

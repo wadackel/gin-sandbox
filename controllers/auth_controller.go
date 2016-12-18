@@ -43,7 +43,7 @@ func (controller AuthController) Auth(c *gin.Context) {
 	}
 
 	var user models.User
-	controller.db.Debug().Where(&models.User{
+	controller.db.Where(&models.User{
 		Email:    json.Email,
 		Password: pass,
 	}).First(&user)

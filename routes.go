@@ -18,11 +18,19 @@ func buildRoutes(db *gorm.DB) *gin.Engine {
 	}
 
 	// Users
-	userController := controllers.NewUserController(db)
+	userController := controllers.NewUsersController(db)
 	users := router.Group("/users")
 	{
 		users.Use(middleware.JWTMiddleware(db))
 		users.GET("/", userController.GetAll)
+		users.GET("/:id", userController.Get)
+	}
+
+	// Articles
+	articlesController := controllers.NewArticlesController(db)
+	articles := router.Group("/articles")
+	{
+		articles.GET("/", articlesController.GetAll)
 	}
 
 	return router
