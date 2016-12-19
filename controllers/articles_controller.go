@@ -9,36 +9,36 @@ import (
 )
 
 type ArticlesController struct {
+	Controller
 	db *gorm.DB
 }
 
 func NewArticlesController(db *gorm.DB) *ArticlesController {
-	return &ArticlesController{db}
+	return &ArticlesController{db: db}
 }
 
-func (controller ArticlesController) GetAll(c *gin.Context) {
+func (ctl ArticlesController) GetAll(c *gin.Context) {
 	user := c.MustGet("user").(models.User)
 	articles := []models.Article{}
-	controller.db.Where(&models.Article{UserID: user.ID}).Find(&articles)
+	ctl.db.Where(&models.Article{UserID: user.ID}).Find(&articles)
 
-	c.JSON(http.StatusOK, gin.H{"status": "ok", "articles": articles})
+	ctl.SuccessResponse(c, gin.H{
+		"articles": articles,
+	})
 }
 
-func (controller ArticlesController) Get(c *gin.Context) {
+func (ctl ArticlesController) Get(c *gin.Context) {
 	user := c.MustGet("user").(models.User)
 	id := c.Param("id")
 	article := models.Article{}
-	controller.db.Where(&models.Article{UserID: user.ID}).First(&article, id)
+	ctl.db.Where(&models.Article{UserID: user.ID}).First(&article, id)
+
 	if article.ID < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  "error",
-			"message": "パラメータが不正です",
-		})
+		ctl.ErrorResponse(c, http.StatusBadRequest, "パラメータが不正です")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status":  "ok",
+	ctl.SuccessResponse(c, gin.H{
 		"article": article,
 	})
 }
@@ -48,13 +48,10 @@ type CreateJSON struct {
 	Body  string `json:"body" binding:"required"`
 }
 
-func (controller ArticlesController) Create(c *gin.Context) {
+func (ctl ArticlesController) Create(c *gin.Context) {
 	var json CreateJSON
 	if c.BindJSON(&json) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  "error",
-			"message": "パラメータが無効です",
-		})
+		ctl.ErrorResponse(c, http.StatusBadRequest, "パラメータが不正です")
 		return
 	}
 
@@ -64,10 +61,9 @@ func (controller ArticlesController) Create(c *gin.Context) {
 		Title:  json.Title,
 		Body:   json.Body,
 	}
-	controller.db.Create(&article)
+	ctl.db.Create(&article)
 
-	c.JSON(http.StatusOK, gin.H{
-		"status":  "ok",
+	ctl.SuccessResponse(c, gin.H{
 		"article": article,
 	})
 }
@@ -77,55 +73,44 @@ type UpdateJSON struct {
 	Body  string `json:"body"`
 }
 
-func (controller ArticlesController) Update(c *gin.Context) {
+func (ctl ArticlesController) Update(c *gin.Context) {
 	user := c.MustGet("user").(models.User)
 	id := c.Param("id")
 	article := models.Article{}
-	controller.db.Where(&models.Article{UserID: user.ID}).First(&article, id)
+	ctl.db.Where(&models.Article{UserID: user.ID}).First(&article, id)
 	if article.ID < 1 {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  "error",
-			"message": "パラメータが不正です",
-		})
+		ctl.ErrorResponse(c, http.StatusBadRequest, "パラメータが不正です")
 		return
 	}
 
 	var json UpdateJSON
 	if c.BindJSON(&json) != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  "error",
-			"message": "パラメータが不正です",
-		})
+		ctl.ErrorResponse(c, http.StatusBadRequest, "パラメータが不正です")
 		return
 	}
 
-	controller.db.Model(&article).Updates(&models.Article{
+	ctl.db.Model(&article).Updates(&models.Article{
 		Title: json.Title,
 		Body:  json.Body,
 	})
 
-	c.JSON(http.StatusOK, gin.H{
-		"status":  "ok",
+	ctl.SuccessResponse(c, gin.H{
 		"article": article,
 	})
 }
 
-func (controller ArticlesController) Delete(c *gin.Context) {
+func (ctl ArticlesController) Delete(c *gin.Context) {
 	user := c.MustGet("user").(models.User)
 	id := c.Param("id")
 	article := models.Article{}
-	controller.db.Where(&models.Article{UserID: user.ID}).First(&article, id)
+	ctl.db.Where(&models.Article{UserID: user.ID}).First(&article, id)
 	if article.ID < 1 {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  "error",
-			"message": "パラメータが不正です",
-		})
+		ctl.ErrorResponse(c, http.StatusBadRequest, "パラメータが不正です")
 		return
 	}
 
-	controller.db.Delete(&article)
-	c.JSON(http.StatusOK, gin.H{
-		"status":  "ok",
+	ctl.db.Delete(&article)
+	ctl.SuccessResponse(c, gin.H{
 		"article": article,
 	})
 }
