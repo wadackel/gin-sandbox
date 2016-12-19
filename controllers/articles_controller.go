@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -47,6 +48,26 @@ func (controller ArticlesController) Create(c *gin.Context) {
 	}
 	controller.db.Create(&article)
 
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "ok",
+		"article": article,
+	})
+}
+
+func (controller ArticlesController) Delete(c *gin.Context) {
+	user := c.MustGet("user").(models.User)
+	id, _ := strconv.Atoi(c.Param("id"))
+	article := models.Article{}
+	controller.db.Where(&models.Article{UserID: user.ID}).First(&article, id)
+	if article.ID < 1 {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "error",
+			"message": "パラメータが不正です",
+		})
+		return
+	}
+
+	controller.db.Delete(&article)
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "ok",
 		"article": article,
