@@ -7,6 +7,14 @@ import (
 	"github.com/tsuyoshiwada/gin-sandbox/middleware"
 )
 
+func makeResource(r gin.IRouter, ctl controllers.ResourceController) {
+	r.GET("/", ctl.GetAll)
+	r.GET("/:id", ctl.Get)
+	r.POST("/", ctl.Create)
+	r.PATCH("/", ctl.Update)
+	r.DELETE("/:id", ctl.Delete)
+}
+
 func buildRoutes(db *gorm.DB) *gin.Engine {
 	router := gin.Default()
 
@@ -33,11 +41,7 @@ func buildRoutes(db *gorm.DB) *gin.Engine {
 		articlesController := controllers.NewArticlesController(db)
 		articles := authorized.Group("/articles")
 		{
-			articles.GET("/", articlesController.GetAll)
-			articles.GET("/:id", articlesController.Get)
-			articles.POST("/", articlesController.Create)
-			articles.PATCH("/:id", articlesController.Update)
-			articles.DELETE("/:id", articlesController.Delete)
+			makeResource(articles, articlesController)
 		}
 	}
 

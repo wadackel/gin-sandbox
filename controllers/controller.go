@@ -2,6 +2,14 @@ package controllers
 
 import "github.com/gin-gonic/gin"
 
+type ResourceController interface {
+	GetAll(c *gin.Context)
+	Get(c *gin.Context)
+	Create(c *gin.Context)
+	Update(c *gin.Context)
+	Delete(c *gin.Context)
+}
+
 type Controller struct{}
 
 func (ctl Controller) buildSuccessData(data interface{}) map[string]interface{} {
