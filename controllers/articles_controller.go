@@ -72,6 +72,44 @@ func (controller ArticlesController) Create(c *gin.Context) {
 	})
 }
 
+type UpdateJSON struct {
+	Title string `json:"title"`
+	Body  string `json:"body"`
+}
+
+func (controller ArticlesController) Update(c *gin.Context) {
+	user := c.MustGet("user").(models.User)
+	id := c.Param("id")
+	article := models.Article{}
+	controller.db.Where(&models.Article{UserID: user.ID}).First(&article, id)
+	if article.ID < 1 {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "error",
+			"message": "パラメータが不正です",
+		})
+		return
+	}
+
+	var json UpdateJSON
+	if c.BindJSON(&json) != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "error",
+			"message": "パラメータが不正です",
+		})
+		return
+	}
+
+	controller.db.Model(&article).Updates(&models.Article{
+		Title: json.Title,
+		Body:  json.Body,
+	})
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "ok",
+		"article": article,
+	})
+}
+
 func (controller ArticlesController) Delete(c *gin.Context) {
 	user := c.MustGet("user").(models.User)
 	id := c.Param("id")
