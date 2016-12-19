@@ -18,17 +18,13 @@ func NewUsersController(db *gorm.DB) *UsersController {
 
 func (controller UsersController) GetAll(c *gin.Context) {
 	users := []models.User{}
-	controller.db.Find(&users)
-
+	controller.db.Preload("Articles").Find(&users)
 	c.JSON(http.StatusOK, gin.H{"status": "ok", "users": users})
 }
 
 func (controller UsersController) Get(c *gin.Context) {
 	id := c.Param("id")
 	user := models.User{}
-	articles := []models.Article{}
-	controller.db.First(&user, id)
-	controller.db.Model(&user).Related(&articles)
-	user.Articles = articles
+	controller.db.Preload("articles").First(&user, id)
 	c.JSON(http.StatusOK, gin.H{"status": "ok", "user": user})
 }

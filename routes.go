@@ -34,6 +34,7 @@ func buildRoutes(db *gorm.DB) *gin.Engine {
 		articles := authorized.Group("/articles")
 		{
 			articles.GET("/", articlesController.GetAll)
+			articles.GET("/:id", articlesController.Get)
 			articles.POST("/", articlesController.Create)
 			articles.DELETE("/:id", articlesController.Delete)
 		}

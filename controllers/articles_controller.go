@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -23,6 +22,25 @@ func (controller ArticlesController) GetAll(c *gin.Context) {
 	controller.db.Where(&models.Article{UserID: user.ID}).Find(&articles)
 
 	c.JSON(http.StatusOK, gin.H{"status": "ok", "articles": articles})
+}
+
+func (controller ArticlesController) Get(c *gin.Context) {
+	user := c.MustGet("user").(models.User)
+	id := c.Param("id")
+	article := models.Article{}
+	controller.db.Where(&models.Article{UserID: user.ID}).First(&article, id)
+	if article.ID < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "パラメータが不正です",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "ok",
+		"article": article,
+	})
 }
 
 type CreateJSON struct {
@@ -56,7 +74,7 @@ func (controller ArticlesController) Create(c *gin.Context) {
 
 func (controller ArticlesController) Delete(c *gin.Context) {
 	user := c.MustGet("user").(models.User)
-	id, _ := strconv.Atoi(c.Param("id"))
+	id := c.Param("id")
 	article := models.Article{}
 	controller.db.Where(&models.Article{UserID: user.ID}).First(&article, id)
 	if article.ID < 1 {
