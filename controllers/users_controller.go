@@ -27,7 +27,7 @@ func (ctl UsersController) GetAll(c *gin.Context) {
 func (ctl UsersController) Get(c *gin.Context) {
 	id := c.Param("id")
 	user := models.User{}
-	ctl.db.Preload("articles").First(&user, id)
+	ctl.db.Preload("Articles").First(&user, id)
 
 	ctl.SuccessResponse(c, gin.H{
 		"user": user,

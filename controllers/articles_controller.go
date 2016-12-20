@@ -20,7 +20,7 @@ func NewArticlesController(db *gorm.DB) *ArticlesController {
 func (ctl ArticlesController) GetAll(c *gin.Context) {
 	user := c.MustGet("user").(models.User)
 	articles := []models.Article{}
-	ctl.db.Where(&models.Article{UserID: user.ID}).Find(&articles)
+	ctl.db.Model(&user).Related(&articles)
 
 	ctl.SuccessResponse(c, gin.H{
 		"articles": articles,
@@ -31,7 +31,7 @@ func (ctl ArticlesController) Get(c *gin.Context) {
 	user := c.MustGet("user").(models.User)
 	id := c.Param("id")
 	article := models.Article{}
-	ctl.db.Where(&models.Article{UserID: user.ID}).First(&article, id)
+	ctl.db.Model(&user).Related(&[]models.Article{}).First(&article, id)
 
 	if article.ID < 1 {
 		ctl.ErrorResponse(c, http.StatusBadRequest, "パラメータが不正です")
@@ -77,7 +77,7 @@ func (ctl ArticlesController) Update(c *gin.Context) {
 	user := c.MustGet("user").(models.User)
 	id := c.Param("id")
 	article := models.Article{}
-	ctl.db.Where(&models.Article{UserID: user.ID}).First(&article, id)
+	ctl.db.Model(&user).Related(&[]models.Article{}).First(&article, id)
 	if article.ID < 1 {
 		ctl.ErrorResponse(c, http.StatusBadRequest, "パラメータが不正です")
 		return
@@ -103,7 +103,7 @@ func (ctl ArticlesController) Delete(c *gin.Context) {
 	user := c.MustGet("user").(models.User)
 	id := c.Param("id")
 	article := models.Article{}
-	ctl.db.Where(&models.Article{UserID: user.ID}).First(&article, id)
+	ctl.db.Model(&user).Related(&[]models.Article{}).First(&article, id)
 	if article.ID < 1 {
 		ctl.ErrorResponse(c, http.StatusBadRequest, "パラメータが不正です")
 		return
