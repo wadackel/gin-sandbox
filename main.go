@@ -25,7 +25,10 @@ func main() {
 	}
 	defer db.Close()
 
-	db.AutoMigrate(&models.User{}, &models.Article{})
+	db.AutoMigrate(
+		&models.User{},
+		&models.Article{},
+		&models.Tag{})
 
 	// Init router
 	router := buildRoutes(db.Debug())

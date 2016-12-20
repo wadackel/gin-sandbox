@@ -7,4 +7,5 @@ type User struct {
 	Password string `json:"-"`
 
 	Articles []Article `json:"articles"`
+	Tags     []Tag     `json:"tags"`
 }

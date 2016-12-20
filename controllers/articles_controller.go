@@ -43,13 +43,13 @@ func (ctl ArticlesController) Get(c *gin.Context) {
 	})
 }
 
-type CreateJSON struct {
+type CreateArticleJSON struct {
 	Title string `json:"title" binding:"required"`
 	Body  string `json:"body" binding:"required"`
 }
 
 func (ctl ArticlesController) Create(c *gin.Context) {
-	var json CreateJSON
+	var json CreateArticleJSON
 	if c.BindJSON(&json) != nil {
 		ctl.ErrorResponse(c, http.StatusBadRequest, "パラメータが不正です")
 		return
@@ -68,7 +68,7 @@ func (ctl ArticlesController) Create(c *gin.Context) {
 	})
 }
 
-type UpdateJSON struct {
+type updateArticleJSON struct {
 	Title string `json:"title"`
 	Body  string `json:"body"`
 }
@@ -83,7 +83,7 @@ func (ctl ArticlesController) Update(c *gin.Context) {
 		return
 	}
 
-	var json UpdateJSON
+	var json updateArticleJSON
 	if c.BindJSON(&json) != nil {
 		ctl.ErrorResponse(c, http.StatusBadRequest, "パラメータが不正です")
 		return

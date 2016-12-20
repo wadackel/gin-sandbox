@@ -39,10 +39,11 @@ func buildRoutes(db *gorm.DB) *gin.Engine {
 
 		// Articles
 		articlesController := controllers.NewArticlesController(db)
-		articles := authorized.Group("/articles")
-		{
-			makeResource(articles, articlesController)
-		}
+		makeResource(authorized.Group("/articles"), articlesController)
+
+		// Tags
+		tagsController := controllers.NewTagsController(db)
+		makeResource(authorized.Group("/tags"), tagsController)
 	}
 
 	return router
